@@ -11,13 +11,16 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.12,<3.14"
 pyside6 = "6.8.1"
-pytest = "^8.3.4"
 skyfield = "^1.49"
 pytz = "^2024.2"
 
 [tool.poetry.scripts]
 start = "ndastro.main:init"
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+py-hot-reload = "^1.0.6"
 
 [build-system]
 requires = ["poetry-core"]
@@ -29,6 +32,9 @@ line-length = 150
 [tool.ruff.lint]
 select = ["ALL"]
 ignore=["INP001"]
+
+[tool.ruff.lint.pep8-naming]
+extend-ignore-names = ["enterEvent", "leaveEvent", "hoverEnterEvent", "hoverLeaveEvent", "resizeEvent"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/{tests}/*" = ["S101", "D103"]

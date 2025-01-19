@@ -2,7 +2,9 @@
 
 import sys
 from pathlib import Path
+from signal import SIGINT, signal
 
+import py_hot_reload
 from i18n import set as set_i18n_config
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QApplication
@@ -39,4 +41,15 @@ def init() -> None:
 
 
 if __name__ == "__main__":
+    signal(SIGINT, lambda _, __: QApplication.quit())
     init()
+
+
+def reload() -> None:
+    app = QApplication.instance()
+    if app is not None:
+        app.quit()
+    init()
+
+
+py_hot_reload.run_with_reloader(reload)

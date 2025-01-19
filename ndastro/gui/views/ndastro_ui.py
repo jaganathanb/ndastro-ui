@@ -1,18 +1,22 @@
 """ND Astro module."""
 
 from i18n.translator import t
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import (
     QComboBox,
+    QFrame,
     QHBoxLayout,
     QMainWindow,
     QMessageBox,
+    QSizePolicy,
+    QToolBar,
     QVBoxLayout,
     QWidget,
 )
 
 from ndastro.gui.viewmodels.ndastro_viewmodel import NDAstroViewModel
+from ndastro.libs.south_chart import ResizableAstroChart
 
 
 class NDAstroMainWindow(QMainWindow):
@@ -30,15 +34,35 @@ class NDAstroMainWindow(QMainWindow):
     def init_ui(self) -> None:
         """Initialize the UI."""
         self.setWindowTitle(self._view_model.title)
-        self.vb_layout = QVBoxLayout()
-        self.vb_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        # Split window into top bottom part
+        self.h_layout = QHBoxLayout()
+        self.setLayout(self.h_layout)
+
+        self.vl_left_frame = QVBoxLayout()
+
+        self.left_frame = QFrame()
+        self.h_layout.addWidget(self.left_frame)
+
+        self.h_layout.setStretchFactor(self.left_frame, 10)
+
+        self.left_frame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.left_frame.setLayout(self.vl_left_frame)
+
+        self.vl_left_frame.addWidget(ResizableAstroChart(), 0)
+
+        toolbar = QToolBar("My main toolbar")
+        self.addToolBar(toolbar)
 
         self._create_language_selector()
+
+        toolbar.addWidget(self.combo)
+
         self._create_actions()
         self._create_menus()
 
         container = QWidget()
-        container.setLayout(self.vb_layout)
+        container.setLayout(self.h_layout)
 
         self.setCentralWidget(container)
 
@@ -52,10 +76,6 @@ class NDAstroMainWindow(QMainWindow):
             self.combo.addItem(text)
 
         self.combo.currentIndexChanged.connect(self._view_model.set_language)
-
-        hb_layout = QHBoxLayout()
-        hb_layout.addWidget(self.combo, 0, Qt.AlignmentFlag.AlignRight)
-        self.vb_layout.addLayout(hb_layout)
 
     def _set_language(self) -> None:
         self._retranslate_ui()
