@@ -24,7 +24,7 @@ class HoverableTextItem(QGraphicsTextItem):
         """Initialize the hoverable text.
 
         Args:
-            text (str): _description_
+            text (str): text of the element
             parent (QGraphicsItem): _description_
 
         """

@@ -1,15 +1,19 @@
 """Module providing a function printing python version."""
 
 import sys
+from datetime import datetime
 from pathlib import Path
 from signal import SIGINT, signal
 
 import py_hot_reload
+import pytz
 from i18n import set as set_i18n_config
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QApplication
+from skyfield.units import Angle
 
 from ndastro.gui.models.ndastro_model import NDAstroModel
+from ndastro.gui.ndastro import NDAstro
 from ndastro.gui.viewmodels.ndastro_viewmodel import NDAstroViewModel
 from ndastro.gui.views.ndastro_ui import NDAstroMainWindow
 
@@ -25,13 +29,20 @@ def _configure_i18n(basedir: Path) -> None:
 
 def init() -> None:
     """Initilize the app."""
-    app = QApplication(sys.argv)
+    app = NDAstro([*sys.argv])
+
+    app.setStyle("fusion")
+
     pix = QPixmap(Path.joinpath(basedir, "icons", "hand.ico"))
     app.setWindowIcon(QIcon(pix))
 
     _configure_i18n(basedir)
 
-    model = NDAstroModel([("English", "en"), ("Tamil", "ta")])
+    model = NDAstroModel(
+        datetime.now(pytz.timezone("Asia/Kolkata")),
+        (Angle(degrees=12.38), Angle(degrees=77.54)),
+        [("English", "en"), ("Tamil", "ta")],
+    )
     view_model = NDAstroViewModel(model)
 
     w = NDAstroMainWindow(view_model)

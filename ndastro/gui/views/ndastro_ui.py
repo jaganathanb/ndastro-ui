@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 from ndastro.gui.viewmodels.ndastro_viewmodel import NDAstroViewModel
-from ndastro.libs.south_chart import ResizableAstroChart
+from ndastro.libs.resizable_chart import ResizableAstroChart
 
 
 class NDAstroMainWindow(QMainWindow):
@@ -49,7 +49,7 @@ class NDAstroMainWindow(QMainWindow):
         self.left_frame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.left_frame.setLayout(self.vl_left_frame)
 
-        self.vl_left_frame.addWidget(ResizableAstroChart(), 0)
+        self.vl_left_frame.addWidget(ResizableAstroChart(self._view_model))
 
         toolbar = QToolBar("My main toolbar")
         self.addToolBar(toolbar)

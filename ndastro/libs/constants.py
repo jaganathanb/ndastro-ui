@@ -62,3 +62,6 @@ class AYANAMSA:
                 self.LAHIRI = val
             case _:
                 self.LAHIRI = 24
+
+
+DEGREE_MAX = 360

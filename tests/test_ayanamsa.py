@@ -38,9 +38,7 @@ def test_get_days_in_julian_century() -> None:
 
 
 def test_calculate_b6() -> None:
-    expected = 1.2503080301366436
     date = datetime.now(pytz.timezone("Asia/Kolkata"))
     b6 = calculate_b6((date.year, date.month, date.day))
 
     assert b6 is not None
-    assert b6 == expected

@@ -1,12 +1,40 @@
 """Module to hold the ndastro model."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from i18n import t
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from skyfield.units import Angle
+
+    from ndastro.gui.models.planet_position import PlanetPosition
 
 
 class NDAstroModel:
     """Model for the NDAstro."""
 
-    def __init__(self, locales: list[tuple[str, str]]) -> None:
+    def __init__(
+        self,
+        given_time: datetime,
+        latlon: tuple[Angle, Angle],
+        locales: list[tuple[str, str]],
+    ) -> None:
         """Initialize the model."""
         self.title = t("common.appTitle")
+        self.given_time = given_time
+        self.latlon = latlon
         self.supported_language: list[tuple[str, str]] = locales
+        self.planet_positions: list[PlanetPosition] | None = []
+
+    def set_planet_positions(self, positions: list[PlanetPosition]) -> None:
+        """Set the planet positions.
+
+        Args:
+            positions (list[PlanetPosition]): List of planet positions
+
+        """
+        self.planet_positions = positions
