@@ -15,10 +15,6 @@ skyfield = "^1.49"
 python-i18n = "^0.3.9"
 pytz = "^2024.2"
 
-[tool.poetry.scripts]
-start = "ndastro.main:init"
-
-
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
 py-hot-reload = "^1.0.6"
@@ -38,7 +34,7 @@ ignore=["INP001"]
 extend-ignore-names = ["enterEvent", "leaveEvent", "hoverEnterEvent", "hoverLeaveEvent", "resizeEvent"]
 
 [tool.ruff.lint.per-file-ignores]
-"**/{tests}/*" = ["S101", "D103"]
+"**/{tests}/*" = ["S101", "D103", "D100", "ANN201"]
 
 [tool.ruff.format]
 docstring-code-format = true

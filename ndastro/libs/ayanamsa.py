@@ -1,5 +1,7 @@
 """Module to define ayanamsa related definations."""
 
+import datetime
+
 from skyfield.api import load
 
 from ndastro.libs.constants import AYANAMSA
@@ -8,7 +10,7 @@ from ndastro.libs.constants import AYANAMSA
 ts = load.timescale()
 
 
-def get_lahiri_ayanamsa(date: tuple[int, int, int]) -> float:
+def get_lahiri_ayanamsa(date: datetime.datetime) -> float:
     """Calculate the Lahiri Ayanamsa for a given date."""
     # Constants in the Lahiri Ayanamsa formula
     c0 = AYANAMSA.AYANAMSA_AT_J2000  # Constant term
@@ -16,7 +18,7 @@ def get_lahiri_ayanamsa(date: tuple[int, int, int]) -> float:
     c2 = AYANAMSA.DEG_PER_SQUARE_JCENTURY  # Quadratic term (degrees per square Julian century)
 
     # Calculate b6
-    b6 = calculate_b6(date)
+    b6 = calculate_b6((date.year, date.month, date.day))
 
     return c0 + c1 * b6 + c2 * (b6**2)
 

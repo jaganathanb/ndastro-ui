@@ -2,11 +2,18 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from math import atan2, cos, degrees, radians, sin, tan
+from datetime import datetime, timedelta
+from math import atan2, ceil, cos, degrees, floor, radians, sin, tan
 from typing import TYPE_CHECKING, cast
 
-from ndastro.gui.models.planet_position import PlanetPosition
+from skyfield.almanac import sunrise_sunset
+from skyfield.searchlib import find_discrete
+from skyfield.timelib import Time
+
+from ndastro.gui.models.planet_position import PlanetDetail
+from ndastro.libs.nakshatra_enum import Natchaththirams
+from ndastro.libs.planet_enum import Planets
+from ndastro.libs.retrograde import is_planet_in_retrograde
 
 if TYPE_CHECKING:
     from ndastro.gui.models.kattam import Kattam
@@ -14,7 +21,6 @@ if TYPE_CHECKING:
 from skyfield.api import load
 from skyfield.data.spice import inertial_frames
 from skyfield.elementslib import osculating_elements_of
-from skyfield.framelib import ecliptic_frame
 from skyfield.nutationlib import mean_obliquity
 from skyfield.positionlib import Barycentric
 from skyfield.toposlib import Topos
@@ -22,12 +28,19 @@ from skyfield.units import Angle, Distance
 from skyfield.vectorlib import VectorSum
 
 from ndastro.libs.ayanamsa import get_lahiri_ayanamsa
-from ndastro.libs.constants import AYANAMSA, DEGREE_MAX
+from ndastro.libs.constants import (
+    AYANAMSA,
+    DEGREE_MAX,
+    DEGREES_PER_RAASI,
+    TOTAL_RAASI,
+)
 from ndastro.libs.house_enum import Houses
 from ndastro.libs.rasi_enum import Rasis
 
 if TYPE_CHECKING:
     from ndastro.gui.models.kattam import Kattam
+
+from ndastro.libs.constants import TOTAL_NAKSHATRAS
 
 eph = load("de440s.bsp")
 ts = load.timescale()
@@ -46,41 +59,19 @@ def sign(num: int) -> int:
     return -1 if num < 0 else 1
 
 
-def deg_to_dms(deg: float) -> tuple[int, int, int]:
-    """Convert degrees in decimal format to degrees, minutes, and seconds.
+def dms_to_decimal(degrees: int, minutes: int, seconds: float) -> float:
+    """Convert degrees, minutes, and seconds to decimal degrees.
 
     Args:
-        deg (float): The degree in decimal format.
+        degrees (int): The degrees part.
+        minutes (int): The minutes part.
+        seconds (float): The seconds part.
 
     Returns:
-        tuple[int, int, int]: The degrees, minutes, and seconds.
+        float: The decimal degrees.
 
     """
-    m, s = divmod(abs(deg) * 3600, 60)
-    d, m = divmod(m, 60)
-    d = d * sign(int(d))
-
-    return (int(d), int(m), int(s))
-
-
-def get_ecliptic_position_of(planet_code: str, lat: Angle, lon: Angle, given_time: datetime) -> tuple[Angle, Angle, Distance]:
-    """Return the ecliptic position of the planet for the given latitude, longitude, and datetime.
-
-    Args:
-        planet_code (str): The code of the planet.
-        lat (Angle): The latitude of the observer.
-        lon (Angle): The longitude of the observer.
-        given_time (datetime): The datetime of the observation.
-
-    Returns:
-        tuple[Angle, Angle, Distance]: The ecliptic latitude, longitude, and distance of the planet.
-
-    """
-    t = ts.utc(given_time)
-    observer: VectorSum = eph["earth"] + Topos(latitude_degrees=lat.degrees, longitude_degrees=lon.degrees)
-    astrometric = cast(Barycentric, observer.at(t)).observe(eph[planet_code]).apparent()
-
-    return astrometric.frame_latlon(ecliptic_frame)
+    return degrees + minutes / 60 + seconds / 3600
 
 
 def get_tropical_position_of(planet_code: str, lat: Angle, lon: Angle, given_time: datetime) -> tuple[Angle, Angle, Distance]:
@@ -103,7 +94,7 @@ def get_tropical_position_of(planet_code: str, lat: Angle, lon: Angle, given_tim
     return astrometric.ecliptic_latlon()
 
 
-def get_tropical_planetary_positions(lat: Angle, lon: Angle, given_time: datetime) -> list[PlanetPosition]:
+def get_tropical_planetary_positions(lat: Angle, lon: Angle, given_time: datetime) -> list[PlanetDetail]:
     """Return the tropical positions of the planets.
 
     Args:
@@ -112,7 +103,7 @@ def get_tropical_planetary_positions(lat: Angle, lon: Angle, given_time: datetim
         given_time (datetime): The datetime of the observation.
 
     Returns:
-        list[PlanetPosition]: A list of tropical positions of the planets.
+        list[PlanetDetail]: A list of tropical positions of the planets.
 
     """
     planets = {
@@ -125,7 +116,7 @@ def get_tropical_planetary_positions(lat: Angle, lon: Angle, given_time: datetim
         "Saturn": "saturn barycenter",
         "Rahu": "rahu",
     }
-    positions: list[PlanetPosition] = []
+    positions: list[PlanetDetail] = []
 
     for planet_name, planet_code in planets.items():
         if planet_code == "rahu":
@@ -136,24 +127,25 @@ def get_tropical_planetary_positions(lat: Angle, lon: Angle, given_time: datetim
         lat, lon, distance = get_tropical_position_of(planet_code, lat, lon, given_time)
 
         positions.append(
-            PlanetPosition(
+            PlanetDetail(
                 planet_name,
                 lat,
                 lon,
+                distance=distance,
             ),
         )
 
     return positions
 
 
-def calculate_lunar_nodes(given_time: datetime) -> list[PlanetPosition]:
+def calculate_lunar_nodes(given_time: datetime) -> list[PlanetDetail]:
     """Calculate the positions of the lunar nodes.
 
     Args:
         given_time (datetime): The datetime of the observation.
 
     Returns:
-        list[PlanetPosition]: A list containing the positions of Rahu and Kethu.
+        list[PlanetDetail]: A list containing the positions of Rahu and Kethu.
 
     """
     t = ts.utc(given_time)
@@ -164,18 +156,18 @@ def calculate_lunar_nodes(given_time: datetime) -> list[PlanetPosition]:
     position = cast(VectorSum, (moon - earth)).at(t)
     elements = osculating_elements_of(position, ecliptic)
 
-    rahu_position = (cast(float, cast(Angle, elements.longitude_of_ascending_node).degrees)) % 360
-    kethu_position = (rahu_position + 180) % 360
+    rahu_position = cast(float, cast(Angle, elements.longitude_of_ascending_node).degrees)
+    kethu_position = normalize_degree(rahu_position + 180)
 
     declination_placeholder = 0.0
 
     return [
-        PlanetPosition(
+        PlanetDetail(
             "rahu",
             Angle(degrees=declination_placeholder),
             Angle(degrees=rahu_position),
         ),
-        PlanetPosition(
+        PlanetDetail(
             "kethu",
             Angle(degrees=declination_placeholder),
             Angle(degrees=kethu_position),
@@ -183,7 +175,7 @@ def calculate_lunar_nodes(given_time: datetime) -> list[PlanetPosition]:
     ]
 
 
-def get_sidereal_planet_positions(lat: Angle, lon: Angle, given_time: datetime, ayanamsa: float) -> list[PlanetPosition]:
+def get_sidereal_planet_positions(lat: Angle, lon: Angle, given_time: datetime, ayanamsa: float) -> list[PlanetDetail]:
     """Return the sidereal positions of the planets.
 
     Args:
@@ -193,7 +185,7 @@ def get_sidereal_planet_positions(lat: Angle, lon: Angle, given_time: datetime, 
         ayanamsa (float): The ayanamsa value to be used for calculation.
 
     Returns:
-        list[PlanetPosition]: A list of sidereal positions of the planets.
+        list[PlanetDetail]: A list of sidereal positions of the planets.
 
     """
     positions = get_tropical_planetary_positions(lat, lon, given_time)
@@ -202,13 +194,24 @@ def get_sidereal_planet_positions(lat: Angle, lon: Angle, given_time: datetime, 
     for pos in positions:
         asc = normalize_degree(cast(float, pos.longitude.degrees) - ayanamsa)
 
-        asc_h, asc_adv_by = divmod(asc, 30)
-        rasi_num = normalize_rasi(int(asc_h))
+        asc_h, asc_adv_by = divmod(asc, DEGREES_PER_RAASI)
+        rasi_num = int(asc_h)
 
-        pos.s_longitude = Angle(degrees=asc)
-        pos.rasi_occupied = Rasis(rasi_num if asc_adv_by == 0 else int(rasi_num + 1))
-        pos.posited_at = cast(Houses, cast(Houses, asc_pos.posited_at) + Houses(rasi_num if asc_adv_by == 0 else int(rasi_num + 1)))
+        pos.nirayana_longitude = Angle(degrees=asc)
+        pos.rasi_occupied = Rasis(normalize_rasi_house(rasi_num if asc_adv_by == 0 else int(rasi_num + 1)))
+        pos.house_posited_at = cast(
+            Houses,
+            normalize_rasi_house(cast(Houses, asc_pos.house_posited_at) + Houses(rasi_num)),
+        )
         pos.advanced_by = Angle(degrees=asc_adv_by)
+
+        nakshatra, pada = get_nakshatra_and_pada(Angle(degrees=asc))
+        pos.natchaththiram = nakshatra
+        pos.paatham = pada
+
+        pos.retrograde = (
+            True if pos.planet.code in [Planets.RAHU.code, Planets.KETHU.code] else is_planet_in_retrograde(given_time, pos.planet.code, lat, lon)
+        )
 
     positions.append(asc_pos)
 
@@ -243,10 +246,10 @@ def get_tropical_ascendant_position(given_time: datetime, lat: Angle, lon: Angle
 
     asc = degrees(ascr)
 
-    return Angle(degrees=asc)
+    return Angle(degrees=normalize_degree(asc))
 
 
-def get_sidereal_ascendant_position(given_time: datetime, lat: Angle, lon: Angle, ayanamsa: float = AYANAMSA.LAHIRI) -> PlanetPosition:
+def get_sidereal_ascendant_position(given_time: datetime, lat: Angle, lon: Angle, ayanamsa: float = AYANAMSA.LAHIRI) -> PlanetDetail:
     """Calculate the sidereal ascendant.
 
     Args:
@@ -256,28 +259,96 @@ def get_sidereal_ascendant_position(given_time: datetime, lat: Angle, lon: Angle
         ayanamsa (float): The ayanamsa value to be used for calculation.
 
     Returns:
-        PlanetPosition: The position of the sidereal ascendant.
+        PlanetDetail: The position of the sidereal ascendant.
 
     """
     ascr = get_tropical_ascendant_position(given_time, lat, lon)
 
     asc = normalize_degree(cast(float, ascr.degrees) - ayanamsa)
 
-    asc_h, asc_adv_by = divmod(asc, 30)
-    rasi_num = normalize_rasi(int(asc_h))
-    rasi_occupied = Rasis(rasi_num if asc_adv_by == 0 else int(rasi_num + 1))
+    asc_h, asc_adv_by = divmod(asc, 29.99972222)
+    rasi_num = int(asc_h)
+    rasi_occupied = Rasis(normalize_rasi_house(rasi_num if asc_adv_by == 0 else int(rasi_num + 1)))
     posited_at = Houses.HOUSE1
     advanced_by = Angle(degrees=asc_adv_by)
 
-    return PlanetPosition(
+    nakshatra, pada = get_nakshatra_and_pada(Angle(degrees=asc))
+
+    return PlanetDetail(
         "ascendant",
         Angle(degrees=0),
-        Angle(degrees=asc),
-        posited_at=posited_at,
+        ascr,
+        nirayana_longitude=Angle(degrees=asc),
+        house_posited_at=posited_at,
         advanced_by=advanced_by,
         is_ascendant=True,
+        natchaththiram=nakshatra,
+        paatham=pada,
         rasi_occupied=rasi_occupied,
     )
+
+
+def get_nakshatra_and_pada(longitude: Angle) -> tuple[Natchaththirams, int]:
+    """Get the nakshatra and pada from the planet longitude.
+
+    Args:
+        longitude (Angle): The longitude of the planet.
+
+    Returns:
+        tuple[str, int]: The nakshatra and pada.
+
+    """
+    degrees_per_nakshatra = Angle(degrees=DEGREE_MAX / TOTAL_NAKSHATRAS)
+
+    total_degrees_mins = cast(float, longitude.arcminutes())
+
+    nakshatra_index = total_degrees_mins / degrees_per_nakshatra.arcminutes()
+
+    remainder = nakshatra_index - floor(nakshatra_index)
+    pada_threshold_1 = 0.25
+    pada_threshold_2 = 0.5
+    pada_threshold_3 = 0.75
+
+    if remainder < pada_threshold_1:
+        pada = 1
+    elif remainder < pada_threshold_2:
+        pada = 2
+    elif remainder < pada_threshold_3:
+        pada = 3
+    else:
+        pada = 4
+
+    nakshatra = Natchaththirams(ceil(nakshatra_index + 1 if nakshatra_index == 0 else nakshatra_index))
+
+    return nakshatra, pada
+
+
+def get_sunrise_sunset(lat: Angle, lon: Angle, given_time: datetime) -> tuple[datetime, datetime]:
+    """Calculate the sunrise and sunset times for a given location and date.
+
+    Args:
+        lat (Angle): The latitude of the location.
+        lon (Angle): The longitude of the location.
+        given_time (datetime): The date and time for which to calculate the sunrise and sunset times.
+
+    Returns:
+        tuple[datetime, datetime]: A tuple containing the sunrise and sunset times as datetime objects.
+
+    """
+    # Define location
+    location = Topos(latitude_degrees=lat.degrees, longitude_degrees=lon.degrees)
+
+    # Define time range for the search (e.g., one day)
+    t_start = ts.utc(given_time.date())  # Start of the day
+    t_end = ts.utc(given_time.date() + timedelta(days=1))  # End of the day
+
+    # Find sunrise time
+    f = sunrise_sunset(eph, location)
+    times, events = find_discrete(t_start, t_end, f)
+
+    sunrise, sunset = cast(list[Time], [time for time, _ in zip(times, events)])
+
+    return cast(tuple[datetime, datetime], (sunrise.utc_datetime(), sunset.utc_datetime()))
 
 
 def normalize_degree(degree: float) -> float:
@@ -291,13 +362,13 @@ def normalize_degree(degree: float) -> float:
 
     """
     if degree < 0:
-        return degree + DEGREE_MAX
+        return DEGREE_MAX + degree
     while degree > DEGREE_MAX:
         degree -= DEGREE_MAX
     return degree
 
 
-def normalize_rasi(position: int) -> int:
+def normalize_rasi_house(position: int) -> int:
     """Normalize the rasi position to be within 1-12.
 
     Args:
@@ -308,21 +379,21 @@ def normalize_rasi(position: int) -> int:
 
     """
     if position < 0:
-        return position + 12
-    while position > 12:
-        position -= 12
+        return TOTAL_RAASI + position
+    while position > TOTAL_RAASI:
+        position -= TOTAL_RAASI
     return position
 
 
-def get_all_planets_posited_in(rasi: Rasis, planets: list[PlanetPosition]) -> list[PlanetPosition] | None:
+def get_all_planets_posited_in(rasi: Rasis, planets: list[PlanetDetail]) -> list[PlanetDetail] | None:
     """Get all the planets posited in the given rasi.
 
     Args:
         rasi (Rasis): The rasi to check.
-        planets (list[PlanetPosition]): The list of planets.
+        planets (list[PlanetDetail]): The list of planets.
 
     Returns:
-        list[PlanetPosition] | None: A list of planets posited in the given rasi, or None if none are found.
+        list[PlanetDetail] | None: A list of planets posited in the given rasi, or None if none are found.
 
     """
     for pos in planets:
@@ -342,7 +413,7 @@ def get_kattams(lat: Angle, lon: Angle, given_time: datetime) -> list[Kattam]:
         list[Kattam]: A list of kattams.
 
     """
-    ayanamsa = get_lahiri_ayanamsa((cast(int, datetime.year), cast(int, datetime.month), cast(int, datetime.day)))
+    ayanamsa = get_lahiri_ayanamsa(given_time)
     ascendant = get_sidereal_ascendant_position(given_time, lat, lon, ayanamsa)
     planets = get_sidereal_planet_positions(lat, lon, given_time, ayanamsa)
 

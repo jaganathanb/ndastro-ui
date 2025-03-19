@@ -6,16 +6,17 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from ndastro.libs.planet_enum import Planets
-from ndastro.libs.rasi_enum import Rasis
 
 if TYPE_CHECKING:
     from skyfield.units import Angle, Distance
 
     from ndastro.libs.house_enum import Houses
+    from ndastro.libs.nakshatra_enum import Natchaththirams
+    from ndastro.libs.rasi_enum import Rasis
 
 
 @dataclass
-class PlanetPosition:
+class PlanetDetail:
     """Represents the position of a planet with various attributes.
 
     Attributes:
@@ -30,6 +31,8 @@ class PlanetPosition:
         rasi_occupied (Rasis | None): The rasi (zodiac sign) occupied by the planet, if applicable.
         is_ascendant (bool): Indicates whether the planet is the ascendant.
         planet (Planets): The planet associated with this position.
+        nakshatra (Natchaththirams | None): The natchaththiram (lunar mansion) occupied by the planet, if applicable.
+        paatham (int | None): The paatham (quarter) of the nakshatra occupied by the planet, if applicable.
 
     """
 
@@ -48,10 +51,10 @@ class PlanetPosition:
     distance: Distance | None = None
     """The distance of the planet from a reference point."""
 
-    s_longitude: Angle | None = None
+    nirayana_longitude: Angle | None = None
     """The sidereal longitude of the planet, if applicable."""
 
-    posited_at: Houses | None = None
+    house_posited_at: Houses | None = None
     """The house in which the planet is posited, if applicable."""
 
     advanced_by: Angle | None = None
@@ -65,3 +68,9 @@ class PlanetPosition:
 
     is_ascendant: bool = False
     """Indicates whether the planet is the ascendant."""
+
+    natchaththiram: Natchaththirams | None = None
+    """The natchaththiram (lunar mansion) occupied by the planet, if applicable."""
+
+    paatham: int | None = None
+    """The paatham (quarter) of the natchaththiram occupied by the planet, if applicable."""

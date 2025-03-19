@@ -11,7 +11,7 @@ from ndastro.libs.utils import get_tropical_planetary_positions
 
 if TYPE_CHECKING:
     from ndastro.gui.models.ndastro_model import NDAstroModel
-    from ndastro.gui.models.planet_position import PlanetPosition
+    from ndastro.gui.models.planet_position import PlanetDetail
 
 
 class NDAstroViewModel(QObject):
@@ -56,11 +56,11 @@ class NDAstroViewModel(QObject):
         return self._model.supported_language
 
     @property
-    def planet_positions(self) -> list[PlanetPosition] | None:
+    def planet_positions(self) -> list[PlanetDetail] | None:
         """Return positions of the planets.
 
         Returns:
-            list[PlanetPosition]: List of planet positions
+            list[PlanetDetail]: List of planet positions
 
         """
         return self._model.planet_positions

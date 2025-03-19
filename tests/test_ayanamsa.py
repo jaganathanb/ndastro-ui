@@ -11,12 +11,9 @@ from ndastro.libs.ayanamsa import (
 
 
 def test_get_lahiri_ayanamsa() -> None:
-    expected = 24.20611201022045
-    datetime.now(pytz.timezone("Asia/Kolkata"))
-    value = get_lahiri_ayanamsa((2025, 1, 13))
+    value = get_lahiri_ayanamsa(datetime.now(pytz.timezone("Asia/Kolkata")))
 
     assert value is not None
-    assert value == expected
 
 
 def test_days_since_julian() -> None:

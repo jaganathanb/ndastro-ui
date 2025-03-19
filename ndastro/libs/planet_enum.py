@@ -42,3 +42,27 @@ class Planets(IntEnum):
 
         """
         return [el.name for el in Planets]
+
+    @property
+    def code(self) -> str:
+        """Return the planet code.
+
+        Returns:
+            str: the planet code
+
+        """
+        planet_codes = {
+            Planets.EMPTY: "empty",
+            Planets.ASCENDANT: "ascendant",
+            Planets.SUN: "sun",
+            Planets.MOON: "moon",
+            Planets.MARS: "mars barycenter",
+            Planets.MERCURY: "mercury",
+            Planets.JUPITER: "jupiter barycenter",
+            Planets.VENUS: "venus",
+            Planets.SATURN: "saturn barycenter",
+            Planets.RAHU: "rahu",
+            Planets.KETHU: "kethu",
+        }
+
+        return planet_codes.get(self, "empty")

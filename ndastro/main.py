@@ -5,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 from signal import SIGINT, signal
 
-import py_hot_reload
 import pytz
 from i18n import set as set_i18n_config
 from PySide6.QtGui import QIcon, QPixmap
@@ -56,11 +55,9 @@ if __name__ == "__main__":
     init()
 
 
-def reload() -> None:
-    app = QApplication.instance()
-    if app is not None:
-        app.quit()
+def main() -> None:
+    """Entry point for the application.
+
+    This function initializes the application by calling the init() function.
+    """
     init()
-
-
-py_hot_reload.run_with_reloader(reload)

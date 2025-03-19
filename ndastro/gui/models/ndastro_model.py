@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
     from skyfield.units import Angle
 
-    from ndastro.gui.models.planet_position import PlanetPosition
+    from ndastro.gui.models.planet_position import PlanetDetail
 
 
 class NDAstroModel:
@@ -28,13 +28,13 @@ class NDAstroModel:
         self.given_time = given_time
         self.latlon = latlon
         self.supported_language: list[tuple[str, str]] = locales
-        self.planet_positions: list[PlanetPosition] | None = []
+        self.planet_positions: list[PlanetDetail] | None = []
 
-    def set_planet_positions(self, positions: list[PlanetPosition]) -> None:
+    def set_planet_positions(self, positions: list[PlanetDetail]) -> None:
         """Set the planet positions.
 
         Args:
-            positions (list[PlanetPosition]): List of planet positions
+            positions (list[PlanetDetail]): List of planet positions
 
         """
         self.planet_positions = positions
