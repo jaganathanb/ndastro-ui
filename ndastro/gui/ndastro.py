@@ -13,3 +13,4 @@ class NDAstro(QApplication):
     """
 
     language_changed = Signal(str)
+    theme_changed = Signal(str)

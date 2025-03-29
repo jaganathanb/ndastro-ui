@@ -1,5 +1,6 @@
 """Module providing a function printing python version."""
 
+import logging
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -15,6 +16,7 @@ from ndastro.gui.models.ndastro_model import NDAstroModel
 from ndastro.gui.ndastro import NDAstro
 from ndastro.gui.viewmodels.ndastro_viewmodel import NDAstroViewModel
 from ndastro.gui.views.ndastro_ui import NDAstroMainWindow
+from resources import *  # noqa: F403
 
 basedir = Path(__file__).resolve().parent
 
@@ -22,7 +24,7 @@ basedir = Path(__file__).resolve().parent
 def _configure_i18n(basedir: Path) -> None:
     set_i18n_config("file_format", "json")
     set_i18n_config("filename_format", "{namespace}.{locale}.{format}")
-    set_i18n_config("load_path", [Path.joinpath(basedir, "locales")])
+    set_i18n_config("load_path", [Path.joinpath(basedir, "resources", "locales")])
     set_i18n_config("skip_locale_root_data", value=True)
 
 
@@ -30,17 +32,19 @@ def init() -> None:
     """Initilize the app."""
     app = NDAstro([*sys.argv])
 
-    app.setStyle("fusion")
+    logging.basicConfig(level=logging.DEBUG)
 
-    pix = QPixmap(Path.joinpath(basedir, "icons", "hand.ico"))
+    pix = QPixmap(":/icons/hand.png")
     app.setWindowIcon(QIcon(pix))
 
-    _configure_i18n(basedir)
+    base_dir = Path(__file__).resolve().parent
+    _configure_i18n(base_dir)
 
     model = NDAstroModel(
         datetime.now(pytz.timezone("Asia/Kolkata")),
         (Angle(degrees=12.38), Angle(degrees=77.54)),
         [("English", "en"), ("Tamil", "ta")],
+        [("Light", "light"), ("Dark", "dark")],
     )
     view_model = NDAstroViewModel(model)
 

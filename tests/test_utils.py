@@ -14,6 +14,7 @@ from ndastro.libs.planet_enum import Planets
 from ndastro.libs.utils import (
     calculate_lunar_nodes,
     dms_to_decimal,
+    get_kattams,
     get_nakshatra_and_pada,
     get_sidereal_ascendant_position,
     get_sidereal_planet_positions,
@@ -49,7 +50,7 @@ def test_position_of() -> None:
     assert lon is not None
     assert dis is not None
 
-    print("Moon position is {lon}", cast(float, lon.degrees) - 24 % 360)
+    print("Moon position is {lon}", cast("float", lon.degrees) - 24 % 360)
 
 
 def test_get_tropical_planetary_positions() -> None:
@@ -63,7 +64,7 @@ def test_get_tropical_planetary_positions() -> None:
     assert planet_pos is not None
     assert len(planet_pos) == 9
     for pos in planet_pos:
-        print(f"The {pos.name}'s position is: {(cast(float, pos.longitude.degrees) - AYANAMSA.LAHIRI) % 360}")
+        print(f"The {pos.name}'s position is: {(cast('float', pos.longitude.degrees) - AYANAMSA.LAHIRI) % 360}")
 
 
 def test_get_sidereal_planetary_positions() -> None:
@@ -81,8 +82,8 @@ def test_get_sidereal_planetary_positions() -> None:
         rasi_occupied_str = str(pos.rasi_occupied) if pos.rasi_occupied is not None else "Unknown"
         print(
             f"The {pos.name} is in {rasi_occupied_str} rasi, advanced by "
-            f"{cast(Angle, pos.advanced_by).dstr(format='{0!s}{1!s}°{2:02}\'{3:02}.{4:0{5}}"')} "
-            f"at house {pos.house_posited_at} - total longitude = {cast(Angle, pos.nirayana_longitude).degrees}°",
+            f"{cast('Angle', pos.advanced_by).dstr(format='{0!s}{1!s}°{2:02}\'{3:02}.{4:0{5}}"')} "
+            f"at house {pos.house_posited_at} - total longitude = {cast('Angle', pos.nirayana_longitude).degrees}°",
             f"retrograde = {pos.retrograde}",
             f"nakshatra = {pos.natchaththiram} and pada = {pos.paatham}",
         )
@@ -99,7 +100,7 @@ def test_calculate_lunar_nodes() -> None:
 
 def test_get_tropical_ascendant_position() -> None:
     pos = get_tropical_ascendant_position(datetime.now(pytz.timezone("Asia/Kolkata")), Angle(degrees=12.59), Angle(degrees=77.35))
-    house = cast(float, pos.degrees) // 30
+    house = cast("float", pos.degrees) // 30
     print(f"Ascendant is in {house}th rasi {pos.dstr()} {pos.dms()}")
 
 
@@ -108,7 +109,7 @@ def test_get_sidereal_ascendant_position() -> None:
     a = Angle(degrees=103.56)
     print(f"The DMS = {a.dstr(format='{0}{1}°{2:02}\'{3:02}.{4:0{5}}"')}")
     rasi_occupied_str = str(pos.rasi_occupied) if pos.rasi_occupied is not None else "Unknown"
-    print(f"S Ascendant is in {rasi_occupied_str} rasi, advanced by {cast(Angle, pos.advanced_by).dstr(format='{0}{1}°{2:02}\'{3:02}.{4:0{5}}"')}")
+    print(f"S Ascendant is in {rasi_occupied_str} rasi, advanced by {cast('Angle', pos.advanced_by).dstr(format='{0}{1}°{2:02}\'{3:02}.{4:0{5}}"')}")
 
 
 @pytest.mark.parametrize(
@@ -162,3 +163,22 @@ def test_get_sunrise_sunset(latitude: float, longitude: float, given_time: datet
     sunrise_str = sunrise.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S IST")
     sunset_str = sunset.astimezone(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S IST")
     print(f"Location ({latitude}, {longitude}) - Sunrise: {sunrise_str}, Sunset: {sunset_str}")
+
+
+@pytest.mark.parametrize(
+    ("latitude", "longitude", "given_time"),
+    [
+        (12.9716, 77.5946, datetime.now(tz=pytz.timezone("Asia/Kolkata"))),  # Bengaluru, India
+        (12.9716, 77.5946, datetime(2025, 6, 21, tzinfo=pytz.timezone("Asia/Kolkata"))),  # Bengaluru, India
+        (12.9716, 77.5946, datetime(2025, 12, 25, tzinfo=pytz.timezone("Asia/Kolkata"))),  # Bengaluru, India
+    ],
+)
+def test_get_kattams(latitude: float, longitude: float, given_time: datetime) -> None:
+    kattams = get_kattams(Angle(degrees=latitude), Angle(degrees=longitude), given_time)
+
+    assert kattams is not None, "Kattams should not be None"
+    assert isinstance(kattams, list), "Kattams should be a list"
+    # Assuming Kattam has a specific attribute to check, e.g., 'name'
+    for kattam in kattams:
+        assert hasattr(kattam, "name"), "Each Kattam should have a 'name' attribute"
+        print(f"Kattam: {kattam.order}")

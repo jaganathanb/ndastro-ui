@@ -1,8 +1,12 @@
 """Module to hold Rasi enums."""
 
+from __future__ import annotations
+
 from enum import IntEnum
 
 from i18n import t
+
+from ndastro.libs.planet_enum import Planets
 
 
 class Rasis(IntEnum):
@@ -30,8 +34,35 @@ class Rasis(IntEnum):
         """
         return t(f"core.rasis.rasi{self.value}")
 
+    @property
+    def owner(self) -> Planets | None:
+        """Get the owner planet of a given Rasi.
+
+        Args:
+            rasi (int): The Rasi number.
+
+        Returns:
+            Planets | None: The owner planet of the Rasi or None if invalid Rasi.
+
+        """
+        rasi_to_planet = {
+            1: Planets.MARS,
+            2: Planets.VENUS,
+            3: Planets.MERCURY,
+            4: Planets.MOON,
+            5: Planets.SUN,
+            6: Planets.MERCURY,
+            7: Planets.VENUS,
+            8: Planets.MARS,
+            9: Planets.JUPITER,
+            10: Planets.SATURN,
+            11: Planets.SATURN,
+            12: Planets.JUPITER,
+        }
+        return rasi_to_planet[self.value]
+
     @classmethod
-    def from_string(cls, rasi: str) -> "Rasis":
+    def from_string(cls, rasi: str) -> Rasis:
         """Convert a Rasi name to its corresponding enum member.
 
         Args:

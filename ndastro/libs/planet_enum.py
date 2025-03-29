@@ -34,6 +34,33 @@ class Planets(IntEnum):
         return t(f"core.planets.planet{num}")
 
     @staticmethod
+    def from_code(code: str) -> "Planets":
+        """Convert planet code to planet enum.
+
+        Args:
+            code (str): the planet code
+
+        Returns:
+            Planets: the corresponding planet enum
+
+        """
+        planet_codes = {
+            "empty": Planets.EMPTY,
+            "ascendant": Planets.ASCENDANT,
+            "sun": Planets.SUN,
+            "moon": Planets.MOON,
+            "mars barycenter": Planets.MARS,
+            "mercury": Planets.MERCURY,
+            "jupiter barycenter": Planets.JUPITER,
+            "venus": Planets.VENUS,
+            "saturn barycenter": Planets.SATURN,
+            "rahu": Planets.RAHU,
+            "kethu": Planets.KETHU,
+        }
+
+        return planet_codes.get(code, Planets.EMPTY)
+
+    @staticmethod
     def to_list() -> list[str]:
         """Convert planet enum to list of planet name.
 
@@ -66,3 +93,27 @@ class Planets(IntEnum):
         }
 
         return planet_codes.get(self, "empty")
+
+    @property
+    def color(self) -> str:
+        """Return the planet color code.
+
+        Returns:
+            str: the planet color code
+
+        """
+        planet_colors = {
+            Planets.EMPTY: "#000000",  # Black
+            Planets.ASCENDANT: "#FFFFFF",  # White
+            Planets.SUN: "#FFD700",  # Gold
+            Planets.MOON: "#C0C0C0",  # Silver
+            Planets.MARS: "#FF0000",  # Red
+            Planets.MERCURY: "#008000",  # Green
+            Planets.JUPITER: "#FFFF00",  # Yellow
+            Planets.VENUS: "#FF69B4",  # Pink
+            Planets.SATURN: "#00008B",  # DarkBlue
+            Planets.RAHU: "#8A2BE2",  # BlueViolet
+            Planets.KETHU: "#8B0000",  # DarkRed
+        }
+
+        return planet_colors.get(self, "#000000")  # Default to Black

@@ -2,7 +2,7 @@
 
 from i18n.translator import t
 from PySide6.QtCore import Slot
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import (
     QComboBox,
     QFrame,
@@ -28,6 +28,7 @@ class NDAstroMainWindow(QMainWindow):
         self._view_model = view_model
 
         self._view_model.language_changed.connect(self._set_language)
+        self._view_model.theme_changed.connect(self._set_theme)
 
         self.init_ui()
 
@@ -54,9 +55,21 @@ class NDAstroMainWindow(QMainWindow):
         toolbar = QToolBar("My main toolbar")
         self.addToolBar(toolbar)
 
-        self._create_language_selector()
+        new_action = QAction(QIcon.fromTheme(QIcon.ThemeIcon.ListAdd), "New", self)
+        new_action.setStatusTip("Create new chart")
+        new_action.setToolTip("Create new chart")
+        toolbar.addAction(new_action)
 
-        toolbar.addWidget(self.combo)
+        # Add a spacer to push the next item to the right
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        toolbar.addWidget(spacer)
+
+        l_selector = self._create_language_selector()
+        t_selector = self._create_theme_selector()
+
+        toolbar.addWidget(l_selector)
+        toolbar.addWidget(t_selector)
 
         self._create_actions()
         self._create_menus()
@@ -68,17 +81,36 @@ class NDAstroMainWindow(QMainWindow):
 
         self.show()
 
-    def _create_language_selector(self) -> None:
+    def _create_language_selector(self) -> QComboBox:
         """Create language selector."""
-        self.combo = QComboBox()
+        combo = QComboBox()
         options = self._view_model.locales
         for _, (text, _) in enumerate(options):
-            self.combo.addItem(text)
+            combo.addItem(text)
 
-        self.combo.currentIndexChanged.connect(self._view_model.set_language)
+        combo.currentIndexChanged.connect(self._view_model.set_language)
+
+        return combo
+
+    def _create_theme_selector(self) -> QComboBox:
+        """Create theme selector."""
+        combo = QComboBox()
+        options = self._view_model.themes
+        for _, (text, _) in enumerate(options):
+            combo.addItem(text)
+
+        combo.currentIndexChanged.connect(self._view_model.set_theme)
+
+        return combo
 
     def _set_language(self) -> None:
         self._retranslate_ui()
+
+    def _set_theme(self) -> None:
+        self._apply_theme()
+
+    def _apply_theme(self) -> None:
+        pass
 
     def _retranslate_ui(self) -> None:
         self.setWindowTitle(t("common.appTitle"))

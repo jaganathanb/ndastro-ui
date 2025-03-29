@@ -6,12 +6,14 @@ from typing import TYPE_CHECKING
 
 from i18n import t
 
+from ndastro.gui.models.kattam import Kattam
+
 if TYPE_CHECKING:
     from datetime import datetime
 
     from skyfield.units import Angle
 
-    from ndastro.gui.models.planet_position import PlanetDetail
+    from ndastro.gui.models.kattam import Kattam
 
 
 class NDAstroModel:
@@ -22,19 +24,21 @@ class NDAstroModel:
         given_time: datetime,
         latlon: tuple[Angle, Angle],
         locales: list[tuple[str, str]],
+        themes: list[tuple[str, str]],
     ) -> None:
         """Initialize the model."""
         self.title = t("common.appTitle")
         self.given_time = given_time
         self.latlon = latlon
+        self.supported_theme: list[tuple[str, str]] = themes
         self.supported_language: list[tuple[str, str]] = locales
-        self.planet_positions: list[PlanetDetail] | None = []
+        self.kattams: list[Kattam] | None = []
 
-    def set_planet_positions(self, positions: list[PlanetDetail]) -> None:
-        """Set the planet positions.
+    def set_kattams(self, kattams: list[Kattam]) -> None:
+        """Set the kattams.
 
         Args:
-            positions (list[PlanetDetail]): List of planet positions
+            kattams (list[Kattam]): List of kattams
 
         """
-        self.planet_positions = positions
+        self.kattams = kattams

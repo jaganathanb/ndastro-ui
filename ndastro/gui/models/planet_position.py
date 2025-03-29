@@ -21,6 +21,7 @@ class PlanetDetail:
 
     Attributes:
         name (str): The name of the planet.
+        short_name (str): A unique code representing the planet.
         latitude (Angle): The latitude of the planet's position.
         longitude (Angle): The longitude of the planet's position.
         distance (Distance): The distance of the planet from a reference point.
@@ -39,11 +40,20 @@ class PlanetDetail:
     name: str
     """The name of the planet."""
 
+    short_name: str
+    """A unique code representing the planet."""
+
     latitude: Angle
     """The latitude of the planet's position."""
 
     longitude: Angle
     """The longitude of the planet's position."""
+
+    rasi_occupied: Rasis
+    """The rasi (zodiac sign) occupied by the planet"""
+
+    house_posited_at: Houses
+    """The house in which the planet is posited"""
 
     planet: Planets = Planets.EMPTY
     """The planet associated with this position."""
@@ -54,17 +64,11 @@ class PlanetDetail:
     nirayana_longitude: Angle | None = None
     """The sidereal longitude of the planet, if applicable."""
 
-    house_posited_at: Houses | None = None
-    """The house in which the planet is posited, if applicable."""
-
     advanced_by: Angle | None = None
     """The angle by which the planet has advanced, if applicable."""
 
     retrograde: bool = False
     """Indicates whether the planet is in retrograde motion."""
-
-    rasi_occupied: Rasis | None = None
-    """The rasi (zodiac sign) occupied by the planet, if applicable."""
 
     is_ascendant: bool = False
     """Indicates whether the planet is the ascendant."""

@@ -5,7 +5,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from PySide6.QtCore import QEvent, Qt
-from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QVBoxLayout,
+    QWidget,
+)
 
 if TYPE_CHECKING:
     from PySide6.QtGui import QEnterEvent
@@ -28,7 +34,9 @@ class CustomPopup(QWidget):
 
         """
         super().__init__(parent)
-        self.setWindowFlags(Qt.WindowType.ToolTip)  # Make it a lightweight popup
+        self.setWindowFlags(Qt.WindowType.Popup)  # Make it a lightweight popup
+        self.setMouseTracking(True)  # Track mouse movement
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)  # Set minimum size
 
         # Add elements to the popup
         label = QLabel(f"Details for: {text}")

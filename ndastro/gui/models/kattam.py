@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from skyfield.units import Angle
 
+    from ndastro.gui.models.planet_position import PlanetDetail
     from ndastro.libs.house_enum import Houses
     from ndastro.libs.planet_enum import Planets
     from ndastro.libs.rasi_enum import Rasis
@@ -23,4 +24,4 @@ class Kattam:
     owner: Planets
     rasi: Rasis
     house: Houses
-    planets: list[Planets] | None
+    planets: list[PlanetDetail] | None

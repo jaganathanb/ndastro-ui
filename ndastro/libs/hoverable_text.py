@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import (
     QGraphicsItem,
     QGraphicsSceneHoverEvent,
@@ -32,10 +31,6 @@ class HoverableTextItem(QGraphicsTextItem):
         self.setAcceptHoverEvents(True)  # Enable hover events
         self.popup: CustomPopup | None = None
 
-        self.hide_timer = QTimer()  # Timer for delayed hide
-        self.hide_timer.setSingleShot(True)  # One-shot timer
-        self.hide_timer.timeout.connect(self.hide_popup)  # Connect timeout to hide
-
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent) -> None:
         """Fire when the mouse enters the text.
 
@@ -58,7 +53,6 @@ class HoverableTextItem(QGraphicsTextItem):
             event (_type_): _description_
 
         """
-        self.hide_timer.start(500)  # Set a 500ms delay before hiding
         super().hoverLeaveEvent(event)
 
     def hide_popup(self) -> None:
