@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, cast
 
 from i18n import t
 from skyfield.almanac import sunrise_sunset
+from skyfield.api import Loader
 from skyfield.searchlib import find_discrete
 
 from ndastro.gui.models.planet_position import PlanetDetail
@@ -24,7 +25,6 @@ if TYPE_CHECKING:
 
     from ndastro.gui.models.kattam import Kattam
 
-from skyfield.api import load
 from skyfield.data.spice import inertial_frames
 from skyfield.elementslib import osculating_elements_of
 from skyfield.nutationlib import mean_obliquity
@@ -43,6 +43,7 @@ from ndastro.libs.constants import (
 from ndastro.libs.house_enum import Houses
 from ndastro.libs.rasi_enum import Rasis
 
+load = Loader("resources/data")
 eph = load("de440s.bsp")
 ts = load.timescale()
 

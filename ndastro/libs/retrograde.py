@@ -1,10 +1,9 @@
 """Provides functions to determine if a planet is in retrograde motion."""
 
 from datetime import datetime, timedelta
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
-from skyfield.api import load
-from skyfield.positionlib import Barycentric
+from skyfield.api import Loader
 from skyfield.searchlib import find_discrete
 from skyfield.timelib import Time
 from skyfield.toposlib import Topos
@@ -12,7 +11,11 @@ from skyfield.units import Angle
 
 from ndastro.libs.planet_enum import Planets
 
+if TYPE_CHECKING:
+    from skyfield.positionlib import Barycentric
+
 # Load ephemeris
+load = Loader("resources/data")
 eph = load("de440s.bsp")
 ts = load.timescale()
 

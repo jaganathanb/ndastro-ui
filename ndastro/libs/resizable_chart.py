@@ -156,6 +156,7 @@ class ResizableAstroChart(QGraphicsView):
                 item.setRect(QRectF(x, y, rect_width, rect_height))
 
                 width = item.rect().width()
+                height = item.rect().height()
 
                 for child in item.childItems():
                     if isinstance(child, HoverableTextItem):
@@ -186,7 +187,7 @@ class ResizableAstroChart(QGraphicsView):
                         actual_pos = x + per_width + t_width  # planet position in the rect + text width
                         if_a_crosses_rect = actual_pos > (x + width)  # if planet crosses the rect
                         planet_x = x + per_width - (actual_pos - (x + width) if if_a_crosses_rect else 0)  # planet position in the rect
-                        planet_y = y + (0 if i % 2 == 0 else t_height)
+                        planet_y = y + height / 3 + (0 if i % 2 == 0 else t_height)
 
                         font = QFont()
                         font.setBold(True)
