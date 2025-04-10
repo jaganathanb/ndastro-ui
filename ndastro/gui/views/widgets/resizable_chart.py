@@ -1,3 +1,9 @@
+"""Define the ResizableAstroChart class, which is a resizable graphical representation of an astrological chart.
+
+It uses PySide6 for rendering and provides functionality to display planetary positions,
+ascendants, and other astrological details.
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
@@ -13,7 +19,7 @@ from PySide6.QtWidgets import (
     QGraphicsView,
 )
 
-from ndastro.libs.hoverable_text import HoverableTextItem
+from ndastro.gui.views.controls.hoverable_text import HoverableTextItem
 from ndastro.libs.planet_enum import Planets
 
 if TYPE_CHECKING:

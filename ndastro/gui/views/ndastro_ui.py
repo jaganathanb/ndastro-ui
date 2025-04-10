@@ -17,8 +17,8 @@ from PySide6.QtWidgets import (
 from qt_material_icons import MaterialIcon
 
 from ndastro.gui.viewmodels.ndastro_viewmodel import NDAstroViewModel
-from ndastro.gui.views.settings_ui import SettingsWindow
-from ndastro.libs.resizable_chart import ResizableAstroChart
+from ndastro.gui.views.dialogs.settings import SettingsWindow
+from ndastro.gui.views.widgets.resizable_chart import ResizableAstroChart
 
 
 class NDAstroMainWindow(QMainWindow):
