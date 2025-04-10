@@ -15,10 +15,14 @@ skyfield = "^1.49"
 python-i18n = "^0.3.9"
 pytz = "^2024.2"
 qdarkstyle = "^3.2.3"
+darkdetect = "^0.8.0"
+qt-material-icons = "^0.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
 py-hot-reload = "^1.0.6"
+pytest-mock = "^3.14.0"
+typing-extensions = "^4.13.1"
 
 [build-system]
 requires = ["poetry-core"]

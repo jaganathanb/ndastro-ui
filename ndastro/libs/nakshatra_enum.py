@@ -4,6 +4,8 @@ from enum import Enum
 
 from i18n import t
 
+from ndastro.libs.planet_enum import Planets
+
 
 class Natchaththirams(Enum):
     """Enum to hold stars."""
@@ -44,6 +46,46 @@ class Natchaththirams(Enum):
 
         """
         return t(f"core.stars.star{self.value}")
+
+    @property
+    def owner(self) -> Planets:
+        """Return the owner (planet) of the star.
+
+        Returns:
+            str: The name of the planet that owns the star.
+
+        """
+        owners = {
+            1: "kethu",
+            2: "venus",
+            3: "sun",
+            4: "moon",
+            5: "mars barycenter",
+            6: "rahu",
+            7: "jupiter barycenter",
+            8: "saturn barycenter",
+            9: "mercury",
+            10: "kethu",
+            11: "venus",
+            12: "sun",
+            13: "moon",
+            14: "mars barycenter",
+            15: "rahu",
+            16: "jupiter barycenter",
+            17: "saturn barycenter",
+            18: "mercury",
+            19: "kethu",
+            20: "venus",
+            21: "sun",
+            22: "moon",
+            23: "mars barycenter",
+            24: "rahu",
+            25: "jupiter barycenter",
+            26: "saturn barycenter",
+            27: "mercury",
+        }
+
+        return Planets.from_code(owners[self.value])
 
     @staticmethod
     def to_string(num: int) -> str:

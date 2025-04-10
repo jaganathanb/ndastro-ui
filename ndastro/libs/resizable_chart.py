@@ -39,7 +39,7 @@ class ResizableAstroChart(QGraphicsView):
         super().__init__()
         self.setScene(QGraphicsScene(self))
         self._view_model = view_model
-        self.theme = "light"
+        self.theme = view_model.settings.get("theme")
         self._view_model.language_changed.connect(self._retranslate_ui)
         self._view_model.theme_changed.connect(self._update_theme)
 
@@ -69,6 +69,7 @@ class ResizableAstroChart(QGraphicsView):
                 # Add a text label inside the square
                 kattam = self._view_model.kattams[KATTAM_RASI_MAP[count - 1] - 1] if self._view_model.kattams else None
                 text = HoverableTextItem(str(kattam.house.value) if kattam else "", None)
+                text.setDefaultTextColor(Qt.GlobalColor.black if self.theme == "light" else Qt.GlobalColor.white)
                 text.setScale(1.5)
 
                 width = rect.rect().width()

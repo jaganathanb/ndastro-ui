@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime, timedelta
 from itertools import groupby
 from math import atan2, ceil, cos, degrees, floor, radians, sin, tan
@@ -43,7 +42,7 @@ from ndastro.libs.constants import (
 from ndastro.libs.house_enum import Houses
 from ndastro.libs.rasi_enum import Rasis
 
-load = Loader("resources/data")
+load = Loader("ndastro/resources/data")
 eph = load("de440s.bsp")
 ts = load.timescale()
 
@@ -215,7 +214,7 @@ def get_sidereal_planet_positions(lat: Angle, lon: Angle, given_time: datetime, 
         pos.rasi_occupied = Rasis(normalize_rasi_house(rasi_num if asc_adv_by == 0 else int(rasi_num + 1)))
         pos.house_posited_at = cast(
             "Houses",
-            normalize_rasi_house(cast("Houses", asc_pos.house_posited_at) + Houses(rasi_num)),
+            normalize_rasi_house(cast("Houses", asc_pos.house_posited_at) + Houses(rasi_num + 1 if rasi_num == 0 else rasi_num)),
         )
         pos.advanced_by = Angle(degrees=asc_adv_by)
 
@@ -227,7 +226,6 @@ def get_sidereal_planet_positions(lat: Angle, lon: Angle, given_time: datetime, 
             True if pos.planet.code in [Planets.RAHU.code, Planets.KETHU.code] else is_planet_in_retrograde(given_time, pos.planet.code, lat, lon)
         )
 
-        logging.debug(f"{pos.name} is {'' if pos.retrograde else 'not'} in retro")
     positions.append(asc_pos)
 
     return positions

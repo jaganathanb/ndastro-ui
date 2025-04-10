@@ -1,3 +1,44 @@
 {
-    "appTitle": "ND Astro"
+    "appTitle": "ND Astro",
+    "menus": {
+        "file": {
+            "title": "File",
+            "new": "New",
+            "open": "Open",
+            "save": "Save",
+            "saveAs": "Save as",
+            "exit": "Exit"
+        },
+        "edit": {
+            "title": "Edit",
+            "undo": "Undo",
+            "redo": "Redo",
+            "cut": "Cut",
+            "copy": "Copy",
+            "paste": "Paste",
+            "delete": "Delete",
+            "selectAll": "Select All"
+        },
+        "view": {
+            "title": "View",
+            "zoomIn": "Zoom In",
+            "zoomOut": "Zoom Out",
+            "resetZoom": "Reset Zoom",
+            "fullscreen": "Fullscreen"
+        },
+        "tools": {
+            "title": "Tools",
+            "settings": "Settings",
+            "preferences": "Preferences",
+            "extensions": "Extensions",
+            "plugins": "Plugins"
+        },
+        "help": {
+            "title": "Help",
+            "documentation": "Documentation",
+            "support": "Support",
+            "about": "About",
+            "checkForUpdates": "Check for Updates"
+        }
+    }
 }

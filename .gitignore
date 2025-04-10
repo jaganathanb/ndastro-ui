@@ -171,4 +171,5 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+resources.py
 install-pyenv-win.ps1

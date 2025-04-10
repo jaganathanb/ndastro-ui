@@ -41,6 +41,21 @@ files = [
 ]
 
 [[package]]
+name = "darkdetect"
+version = "0.8.0"
+description = "Detect OS Dark Mode from Python"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "darkdetect-0.8.0-py3-none-any.whl", hash = "sha256:a7509ccf517eaad92b31c214f593dbcf138ea8a43b2935406bbd565e15527a85"},
+    {file = "darkdetect-0.8.0.tar.gz", hash = "sha256:b5428e1170263eb5dea44c25dc3895edd75e6f52300986353cd63533fe7df8b1"},
+]
+
+[package.extras]
+macos-listener = ["pyobjc-framework-Cocoa"]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.2.2"
 description = "Backport of PEP 654 (exception groups)"
@@ -270,6 +285,24 @@ tomli = {version = ">=1", markers = "python_version < \"3.11\""}
 dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
+name = "pytest-mock"
+version = "3.14.0"
+description = "Thin-wrapper around the mock package for easier use with pytest"
+optional = false
+python-versions = ">=3.8"
+groups = ["dev"]
+files = [
+    {file = "pytest-mock-3.14.0.tar.gz", hash = "sha256:2719255a1efeceadbc056d6bf3df3d1c5015530fb40cf347c0f9afac88410bd0"},
+    {file = "pytest_mock-3.14.0-py3-none-any.whl", hash = "sha256:0b72c38033392a5f4621342fe11e9219ac11ec9d375f8e2a0c164539e0d70f6f"},
+]
+
+[package.dependencies]
+pytest = ">=6.2.5"
+
+[package.extras]
+dev = ["pre-commit", "pytest-asyncio", "tox"]
+
+[[package]]
 name = "python-i18n"
 version = "0.3.9"
 description = "Translation library for Python"
@@ -315,6 +348,21 @@ qtpy = ">=2"
 develop = ["qtsass", "watchdog"]
 docs = ["sphinx", "sphinx-rtd-theme"]
 example = ["pyqt5", "pyside2"]
+
+[[package]]
+name = "qt-material-icons"
+version = "0.2.0"
+description = "Material Symbols by Google for Qt using PySide"
+optional = false
+python-versions = ">=3.6"
+groups = ["main"]
+files = [
+    {file = "qt_material_icons-0.2.0-py3-none-any.whl", hash = "sha256:bdc14af68e7576b1b0847eb37b53fd68962cab9e2469c8a22a06a860b8deb604"},
+    {file = "qt_material_icons-0.2.0.tar.gz", hash = "sha256:4711082ceb3a91743df00a0f366df3c94adbd149bdfa73973e6a8dd0ac5c8603"},
+]
+
+[package.extras]
+dev = ["PySide6", "black", "python-semantic-release"]
 
 [[package]]
 name = "qtpy"
@@ -464,6 +512,18 @@ files = [
 ]
 
 [[package]]
+name = "typing-extensions"
+version = "4.13.1"
+description = "Backported and Experimental Type Hints for Python 3.8+"
+optional = false
+python-versions = ">=3.8"
+groups = ["dev"]
+files = [
+    {file = "typing_extensions-4.13.1-py3-none-any.whl", hash = "sha256:4b6cf02909eb5495cfbc3f6e8fd49217e6cc7944e145cdda8caa3734777f9e69"},
+    {file = "typing_extensions-4.13.1.tar.gz", hash = "sha256:98795af00fb9640edec5b8e31fc647597b4691f099ad75f469a2616be1a76dff"},
+]
+
+[[package]]
 name = "watchdog"
 version = "6.0.0"
 description = "Filesystem events monitoring"
@@ -509,4 +569,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10.0,<=3.13.1"
-content-hash = "eb0ce2a4a60d7ec8db9069dff763059865f0c1a1e0cb8a7ab79014507397218b"
+content-hash = "43012f7e1ffcfb97c7df0ebd9939e09b66c07dcaa1ec83ea6699ba4c5a7ce15d"

@@ -1,8 +1,8 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="icons">
-        <file alias="hand.ico">ndastro/resources/icons/hand.ico</file>
-        <file alias="hand.png">ndastro/resources/icons/hand.png</file>
+        <file alias="ndastro.ico">ndastro/resources/icons/ndastro.ico</file>
+        <file alias="ndastro.png">ndastro/resources/icons/ndastro.png</file>
     </qresource>
     <qresource prefix="styles">
         <file alias="core.qss">ndastro/resources/core.qss</file>

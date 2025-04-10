@@ -8,6 +8,7 @@ from i18n import set as set_i18n_config
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QApplication
 
+from ndastro.core.settings.manager import SettingsManager
 from ndastro.libs.utils import get_kattams
 
 if TYPE_CHECKING:
@@ -80,6 +81,16 @@ class NDAstroViewModel(QObject):
         """
         return self._model.kattams
 
+    @property
+    def settings(self) -> SettingsManager:
+        """Access the settings manager.
+
+        Returns:
+            SettingsManager: The settings manager instance.
+
+        """
+        return self._model.settings
+
     def set_language(self, index: int) -> None:
         """Set language to be used.
 
@@ -107,6 +118,7 @@ class NDAstroViewModel(QObject):
         palette = DarkPalette if theme[1] == "dark" else LightPalette
         cast("NDAstro", app).setStyleSheet(load_stylesheet(qt_api="pyside6", palette=palette))
 
+        self.settings.set("theme", theme[1])
         self.theme_changed.emit(theme[1])
 
     def _get_kattams(self) -> None:

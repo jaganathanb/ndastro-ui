@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from skyfield.positionlib import Barycentric
 
 # Load ephemeris
-load = Loader("resources/data")
+load = Loader("ndastro/resources/data")
 eph = load("de440s.bsp")
 ts = load.timescale()
 
