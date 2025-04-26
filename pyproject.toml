@@ -17,6 +17,7 @@ pytz = "^2024.2"
 qdarkstyle = "^3.2.3"
 darkdetect = "^0.8.0"
 qt-material-icons = "^0.2.0"
+dependency-injector = "^4.46.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"

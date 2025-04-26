@@ -8,7 +8,9 @@ from i18n import set as set_i18n_config
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QApplication
 
-from ndastro.core.settings.manager import SettingsManager
+if TYPE_CHECKING:
+    from ndastro.core.settings.manager import SettingsManager
+
 from ndastro.libs.utils import get_kattams
 
 if TYPE_CHECKING:
@@ -30,15 +32,17 @@ class NDAstroViewModel(QObject):
     language_changed = Signal(str)
     theme_changed = Signal(str)
 
-    def __init__(self, model: NDAstroModel) -> None:
+    def __init__(self, model: NDAstroModel, settings_manager: SettingsManager) -> None:
         """Initialize the view model.
 
         Args:
             model (NDAstroModel): The model
+            settings_manager (SettingsManager): The settings manager
 
         """
         super().__init__()
         self._model = model  # Reference to the model
+        self._settings_manager = settings_manager
         self._get_kattams()
 
     @property
@@ -61,6 +65,16 @@ class NDAstroViewModel(QObject):
         """
         return self._model.supported_language
 
+    @locales.setter
+    def locales(self, value: list[tuple[str, str]]) -> None:
+        """Set the supported languages.
+
+        Args:
+            value (list[tuple[str, str]]): List of language name & key
+
+        """
+        self._model.supported_language = value
+
     @property
     def themes(self) -> list[tuple[str, str]]:
         """Return theme supported.
@@ -70,6 +84,16 @@ class NDAstroViewModel(QObject):
 
         """
         return self._model.supported_theme
+
+    @themes.setter
+    def themes(self, value: list[tuple[str, str]]) -> None:
+        """Set the supported themes.
+
+        Args:
+            value (list[tuple[str, str]]): List of theme name & key
+
+        """
+        self._model.supported_theme = value
 
     @property
     def kattams(self) -> list[Kattam] | None:
@@ -81,15 +105,15 @@ class NDAstroViewModel(QObject):
         """
         return self._model.kattams
 
-    @property
-    def settings(self) -> SettingsManager:
-        """Access the settings manager.
+    @kattams.setter
+    def kattams(self, value: list[Kattam]) -> None:
+        """Set the positions of the planets.
 
-        Returns:
-            SettingsManager: The settings manager instance.
+        Args:
+            value (list[PlanetDetail]): List of planet positions
 
         """
-        return self._model.settings
+        self._model.kattams = value
 
     def set_language(self, index: int) -> None:
         """Set language to be used.
@@ -118,7 +142,7 @@ class NDAstroViewModel(QObject):
         palette = DarkPalette if theme[1] == "dark" else LightPalette
         cast("NDAstro", app).setStyleSheet(load_stylesheet(qt_api="pyside6", palette=palette))
 
-        self.settings.set("theme", theme[1])
+        self._settings_manager.set("theme", theme[1])
         self.theme_changed.emit(theme[1])
 
     def _get_kattams(self) -> None:

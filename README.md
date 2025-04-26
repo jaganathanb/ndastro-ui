@@ -10,6 +10,7 @@
 4. Create the pyproject.toml file by running the `poetry init` cmd.
 5. Create the virtual environment with `poetry env use <python version>`.
 6. Install the necessary packages for app development with `poetry add <package>` or `poetry install` if dependencies are already listed.
+    Note: Name of the root folder and the `name` field in the `pyproject.toml` should be same. other wise you will endup in error.
 7. If you get Import errors make sure that the you have the python interpreter selected properly. Since we use poetry and pyenv, the     interpreter should be from AppData\Local\pypoetry\Cache\virtualenvs\<virtual env name>\Scripts\python.exe. i.e the virtula env you have created using pyenv - ndastro-ui-zXewb6rb-py3.13
 
 ## Convert resources to python objects

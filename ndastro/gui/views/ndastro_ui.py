@@ -16,7 +16,8 @@ from PySide6.QtWidgets import (
 )
 from qt_material_icons import MaterialIcon
 
-from ndastro.gui.viewmodels.ndastro_viewmodel import NDAstroViewModel
+from ndastro.core.settings.manager import SettingsManager
+from ndastro.gui.viewmodels.ndastro_vm import NDAstroViewModel
 from ndastro.gui.views.dialogs.settings import SettingsWindow
 from ndastro.gui.views.widgets.resizable_chart import ResizableAstroChart
 
@@ -24,10 +25,11 @@ from ndastro.gui.views.widgets.resizable_chart import ResizableAstroChart
 class NDAstroMainWindow(QMainWindow):
     """Module providing a function printing python version."""
 
-    def __init__(self, view_model: NDAstroViewModel) -> None:
+    def __init__(self, view_model: NDAstroViewModel, settings_manager: SettingsManager) -> None:
         """Initialize the app."""
         super().__init__()
         self._view_model = view_model
+        self._settings_manager = settings_manager
 
         self._view_model.language_changed.connect(self._set_language)
         self._view_model.theme_changed.connect(self._set_theme)
@@ -64,7 +66,7 @@ class NDAstroMainWindow(QMainWindow):
         self.left_frame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.left_frame.setLayout(self.vl_left_frame)
 
-        self.vl_left_frame.addWidget(ResizableAstroChart(self._view_model))
+        self.vl_left_frame.addWidget(ResizableAstroChart(self._view_model, self._settings_manager))
 
     def _setup_toolbar(self) -> None:
         """Set up the toolbar."""
@@ -336,7 +338,7 @@ class NDAstroMainWindow(QMainWindow):
         pass
 
     def _open_settings(self) -> None:
-        s = SettingsWindow(self._view_model.settings)
+        s = SettingsWindow(self._settings_manager)
         s.show()
 
     def _open_preferences(self) -> None:

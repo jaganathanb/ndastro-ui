@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QGraphicsView,
 )
 
+from ndastro.core.settings.manager import SettingsManager
 from ndastro.gui.views.controls.hoverable_text import HoverableTextItem
 from ndastro.libs.planet_enum import Planets
 
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
     from skyfield.units import Angle
 
     from ndastro.gui.models.planet_position import PlanetDetail
-    from ndastro.gui.viewmodels.ndastro_viewmodel import NDAstroViewModel
+    from ndastro.gui.viewmodels.ndastro_vm import NDAstroViewModel
 
 from ndastro.libs.constants import KATTAM_RASI_MAP, SYMBOLS
 
@@ -40,12 +41,13 @@ class ResizableAstroChart(QGraphicsView):
 
     """
 
-    def __init__(self, view_model: NDAstroViewModel) -> None:
+    def __init__(self, view_model: NDAstroViewModel, settings_manager: SettingsManager) -> None:
         """Resizable astro chart."""
         super().__init__()
         self.setScene(QGraphicsScene(self))
         self._view_model = view_model
-        self.theme = view_model.settings.get("theme")
+        self._settings_manager = settings_manager
+        self.theme = self._settings_manager.get("APP", "theme")
         self._view_model.language_changed.connect(self._retranslate_ui)
         self._view_model.theme_changed.connect(self._update_theme)
 

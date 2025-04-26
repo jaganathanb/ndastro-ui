@@ -1,6 +1,5 @@
 """Module to hold ND Astro app."""
 
-from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QApplication
 
 
@@ -11,6 +10,3 @@ class NDAstro(QApplication):
         QApplication (_type_): The application
 
     """
-
-    language_changed = Signal(str)
-    theme_changed = Signal(str)
