@@ -1,5 +1,7 @@
 """ND Astro module."""
 
+import asyncio
+
 from i18n.translator import t
 from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction, QIcon
@@ -32,7 +34,7 @@ class NDAstroMainWindow(QMainWindow):
         self._settings_manager = settings_manager
 
         self._view_model.language_changed.connect(self._set_language)
-        self._view_model.theme_changed.connect(self._set_theme)
+        self._view_model.theme_changed.connect(lambda index: asyncio.create_task(self._set_theme()))
 
         self.init_ui()
 
@@ -112,17 +114,17 @@ class NDAstroMainWindow(QMainWindow):
         for _, (text, _) in enumerate(options):
             combo.addItem(text)
 
-        combo.currentIndexChanged.connect(self._view_model.set_theme)
+        combo.currentIndexChanged.connect(lambda index: asyncio.create_task(self._view_model.set_theme(index)))
 
         return combo
 
     def _set_language(self) -> None:
         self._retranslate_ui()
 
-    def _set_theme(self) -> None:
-        self._apply_theme()
+    async def _set_theme(self) -> None:
+        await self._apply_theme()
 
-    def _apply_theme(self) -> None:
+    async def _apply_theme(self) -> None:
         pass
 
     def _retranslate_ui(self) -> None:

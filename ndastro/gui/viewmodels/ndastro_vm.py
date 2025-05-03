@@ -126,7 +126,7 @@ class NDAstroViewModel(QObject):
         set_i18n_config("locale", lang[1])
         self.language_changed.emit(lang[1])
 
-    def set_theme(self, index: int) -> None:
+    async def set_theme(self, index: int) -> None:
         """Set theme to be used.
 
         Args:
@@ -142,7 +142,7 @@ class NDAstroViewModel(QObject):
         palette = DarkPalette if theme[1] == "dark" else LightPalette
         cast("NDAstro", app).setStyleSheet(load_stylesheet(qt_api="pyside6", palette=palette))
 
-        self._settings_manager.set("theme", theme[1])
+        await self._settings_manager.set_async("APP", "theme", theme[1])
         self.theme_changed.emit(theme[1])
 
     def _get_kattams(self) -> None:

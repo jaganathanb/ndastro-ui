@@ -8,6 +8,7 @@ from pathlib import Path
 import pytz
 from dependency_injector.wiring import Provide, inject
 from i18n import set as set_i18n_config
+from PySide6 import QtAsyncio
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QApplication
 from qdarkstyle import DarkPalette, LightPalette, load_stylesheet
@@ -19,8 +20,6 @@ from ndastro.gui.models.ndastro_model import NDAstroModel
 from ndastro.gui.ndastro import NDAstro
 from ndastro.gui.views.ndastro_ui import NDAstroMainWindow
 from resources import *  # noqa: F403
-
-basedir = Path(__file__).resolve().parent
 
 
 def _configure_i18n(basedir: Path) -> None:
@@ -38,19 +37,13 @@ def init(app: QApplication, settings_manager: SettingsManager, ndastro_view: NDA
     pix = QPixmap(str(Path(settings_manager.get("APP", "app_icon")).resolve()))
     app.setWindowIcon(QIcon(pix))
 
-    base_dir = Path(__file__).resolve().parent
-    _configure_i18n(base_dir)
-
     palette = DarkPalette if settings_manager.get("APP", "theme") == "dark" else LightPalette
     app.setStyleSheet(load_stylesheet(qt_api="pyside6", palette=palette))
 
     ndastro_view.show()
     logger.info("NDAstro view displayed.")
 
-    ret = app.exec()
-
-    # Cleanup
-    sys.exit(ret)
+    QtAsyncio.run(handle_sigint=True)
 
 
 @inject
@@ -65,10 +58,12 @@ def main(
     """
     logger = logging.getLogger(__name__)
     init(app, settings_manager, ndastro_view, logger)
-    logger.info("NDAstro application initialized.")
 
 
 if __name__ == "__main__":
+    base_dir = Path(__file__).resolve().parent
+    _configure_i18n(base_dir)
+
     container = AppContainer()
     container.core_package.container.init_resources()
     container.wire(modules=[__name__])
@@ -91,8 +86,8 @@ if __name__ == "__main__":
     logger.info("Starting the NDAstro application...")
 
     app = NDAstro([*sys.argv])
-
     main(app)
     logger.info("NDAstro application finished.")
+
     container.core_package.container.shutdown_resources()
     logger.info("NDAstro application resources cleaned up.")

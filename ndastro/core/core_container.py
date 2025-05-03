@@ -7,6 +7,9 @@ DashaService, and the SettingsManager.
 
 import logging
 import logging.config
+import os
+from collections.abc import Generator
+from concurrent.futures import ThreadPoolExecutor
 
 from dependency_injector import containers, providers
 
@@ -14,6 +17,27 @@ from ndastro.core.services.dasha_service import DashaService
 from ndastro.core.services.kattam_service import KattamService
 from ndastro.core.services.ndastro_service import NdAstroService
 from ndastro.core.settings.manager import SettingsManager
+
+
+def _init_thread_pool(max_workers: int) -> Generator[ThreadPoolExecutor, None, None]:
+    """Initialize a thread pool executor.
+
+    Parameters
+    ----------
+    max_workers : int
+        The maximum number of threads that can be used by the thread pool.
+
+    Yields
+    ------
+    ThreadPoolExecutor
+        A thread pool executor instance.
+
+    Ensures proper shutdown of the thread pool after use.
+
+    """
+    thread_pool = ThreadPoolExecutor(max_workers=max_workers)
+    yield thread_pool
+    thread_pool.shutdown(wait=True)
 
 
 class CoreContainer(containers.DeclarativeContainer):
@@ -24,6 +48,11 @@ class CoreContainer(containers.DeclarativeContainer):
     """
 
     config = providers.Configuration()
+
+    thread_pool = providers.Resource(
+        _init_thread_pool,
+        max_workers=os.cpu_count() or 1,
+    )
 
     logging = providers.Resource(
         logging.config.dictConfig,
