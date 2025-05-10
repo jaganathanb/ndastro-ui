@@ -22,11 +22,12 @@ from ndastro.gui.views.ndastro_ui import NDAstroMainWindow
 from resources import *  # noqa: F403
 
 
-def _configure_i18n(basedir: Path) -> None:
+def _configure_i18n(basedir: Path, lang: str) -> None:
     set_i18n_config("file_format", "json")
     set_i18n_config("filename_format", "{namespace}.{locale}.{format}")
     set_i18n_config("load_path", [Path.joinpath(basedir, "resources", "locales")])
     set_i18n_config("skip_locale_root_data", value=True)
+    set_i18n_config("locale", lang)
 
 
 def init(app: QApplication, settings_manager: SettingsManager, ndastro_view: NDAstroMainWindow, logger: logging.Logger) -> None:
@@ -47,7 +48,7 @@ def init(app: QApplication, settings_manager: SettingsManager, ndastro_view: NDA
 
 
 @inject
-def main(
+def start(
     app: QApplication,
     settings_manager: SettingsManager = Provide[AppContainer.core_package.container.settings_manager],
     ndastro_view: NDAstroMainWindow = Provide[AppContainer.gui_package.container.ndastro_view],
@@ -60,15 +61,21 @@ def main(
     init(app, settings_manager, ndastro_view, logger)
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Set up and start the NDAstro application.
+
+    This function sets up the application container, initializes resources,
+    configures internationalization, and starts the NDAstro application.
+    """
     base_dir = Path(__file__).resolve().parent
-    _configure_i18n(base_dir)
 
     container = AppContainer()
-    container.core_package.container.init_resources()
+    container.core_package.init_resources()
     container.wire(modules=[__name__])
 
     settings_manager = container.core_package.container.settings_manager()
+
+    _configure_i18n(base_dir, settings_manager.get("APP", "language"))
 
     latlong = settings_manager.get("APP", "location").split(",")
     lat, lon = [float(coord) for coord in latlong]
@@ -86,8 +93,12 @@ if __name__ == "__main__":
     logger.info("Starting the NDAstro application...")
 
     app = NDAstro([*sys.argv])
-    main(app)
+    start(app)
     logger.info("NDAstro application finished.")
 
     container.core_package.container.shutdown_resources()
     logger.info("NDAstro application resources cleaned up.")
+
+
+if __name__ == "__main__":
+    main()

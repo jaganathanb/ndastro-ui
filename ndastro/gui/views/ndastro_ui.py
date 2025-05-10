@@ -2,6 +2,7 @@
 
 import asyncio
 
+from dependency_injector.wiring import inject
 from i18n.translator import t
 from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction, QIcon
@@ -20,8 +21,14 @@ from qt_material_icons import MaterialIcon
 
 from ndastro.core.settings.manager import SettingsManager
 from ndastro.gui.viewmodels.ndastro_vm import NDAstroViewModel
-from ndastro.gui.views.dialogs.settings import SettingsWindow
+from ndastro.gui.views.controls.dialogs.frameless_modal import (
+    FramelessModalDialog,
+)
 from ndastro.gui.views.widgets.resizable_chart import ResizableAstroChart
+from ndastro.gui.views.widgets.settings import (
+    SettingsDialog,
+    SettingsViewModel,
+)
 
 
 class NDAstroMainWindow(QMainWindow):
@@ -34,7 +41,6 @@ class NDAstroMainWindow(QMainWindow):
         self._settings_manager = settings_manager
 
         self._view_model.language_changed.connect(self._set_language)
-        self._view_model.theme_changed.connect(lambda index: asyncio.create_task(self._set_theme()))
 
         self.init_ui()
 
@@ -103,7 +109,11 @@ class NDAstroMainWindow(QMainWindow):
         for _, (text, _) in enumerate(options):
             combo.addItem(text)
 
-        combo.currentIndexChanged.connect(self._view_model.set_language)
+        language = self._settings_manager.get("APP", "language")
+        language_index = options.index(next(filter(lambda x: x[1] == language, options), options[0]))
+        combo.setCurrentIndex(language_index)
+
+        combo.currentIndexChanged.connect(lambda index: asyncio.create_task(self._view_model.set_language(index)))
 
         return combo
 
@@ -114,6 +124,10 @@ class NDAstroMainWindow(QMainWindow):
         for _, (text, _) in enumerate(options):
             combo.addItem(text)
 
+        theme = self._settings_manager.get("APP", "theme")
+        theme_index = options.index(next(filter(lambda x: x[1] == theme, options), options[0]))
+        combo.setCurrentIndex(theme_index)
+
         combo.currentIndexChanged.connect(lambda index: asyncio.create_task(self._view_model.set_theme(index)))
 
         return combo
@@ -121,14 +135,69 @@ class NDAstroMainWindow(QMainWindow):
     def _set_language(self) -> None:
         self._retranslate_ui()
 
-    async def _set_theme(self) -> None:
-        await self._apply_theme()
-
-    async def _apply_theme(self) -> None:
-        pass
-
     def _retranslate_ui(self) -> None:
+        self._retranslate_menu_titles()
+        self._retranslate_action_texts()
+        self._retranslate_action_tooltips()
+
+    def _retranslate_menu_titles(self) -> None:
         self.setWindowTitle(t("common.appTitle"))
+        self.file_menu.setTitle(t("common.menus.file.title"))
+        self.edit_menu.setTitle(t("common.menus.edit.title"))
+        self.view_menu.setTitle(t("common.menus.view.title"))
+        self.tools_menu.setTitle(t("common.menus.tools.title"))
+        self.help_menu.setTitle(t("common.menus.help.title"))
+
+    def _retranslate_action_texts(self) -> None:
+        self.new_action.setText(t("common.menus.file.new"))
+        self.open_action.setText(t("common.menus.file.open"))
+        self.save_action.setText(t("common.menus.file.save"))
+        self.save_as_action.setText(t("common.menus.file.saveAs"))
+        self.exit_action.setText(t("common.menus.file.exit"))
+        self.undo_action.setText(t("common.menus.edit.undo"))
+        self.redo_action.setText(t("common.menus.edit.redo"))
+        self.cut_action.setText(t("common.menus.edit.cut"))
+        self.copy_action.setText(t("common.menus.edit.copy"))
+        self.paste_action.setText(t("common.menus.edit.paste"))
+        self.delete_action.setText(t("common.menus.edit.delete"))
+        self.select_all_action.setText(t("common.menus.edit.selectAll"))
+        self.zoom_in_action.setText(t("common.menus.view.zoomIn"))
+        self.zoom_out_action.setText(t("common.menus.view.zoomOut"))
+        self.reset_zoom_action.setText(t("common.menus.view.resetZoom"))
+        self.fullscreen_action.setText(t("common.menus.view.fullscreen"))
+        self.settings_action.setText(t("common.menus.tools.settings"))
+        self.preferences_action.setText(t("common.menus.tools.preferences"))
+        self.extensions_action.setText(t("common.menus.tools.extensions"))
+        self.plugins_action.setText(t("common.menus.tools.plugins"))
+        self.documentation_action.setText(t("common.menus.help.documentation"))
+        self.support_action.setText(t("common.menus.help.support"))
+        self.check_for_updates_action.setText(t("common.menus.help.checkForUpdates"))
+        self.about_action.setText(t("common.menus.help.about"))
+
+    def _retranslate_action_tooltips(self) -> None:
+        self.new_action.setToolTip(t("common.menus.file.new.tooltip"))
+        self.open_action.setToolTip(t("common.menus.file.open.tooltip"))
+        self.save_action.setToolTip(t("common.menus.file.save.tooltip"))
+        self.save_as_action.setToolTip(t("common.menus.file.saveAs.tooltip"))
+        self.exit_action.setToolTip(t("common.menus.file.exit.tooltip"))
+        self.undo_action.setToolTip(t("common.menus.edit.undo.tooltip"))
+        self.redo_action.setToolTip(t("common.menus.edit.redo.tooltip"))
+        self.cut_action.setToolTip(t("common.menus.edit.cut.tooltip"))
+        self.copy_action.setToolTip(t("common.menus.edit.copy.tooltip"))
+        self.paste_action.setToolTip(t("common.menus.edit.paste.tooltip"))
+        self.delete_action.setToolTip(t("common.menus.edit.delete.tooltip"))
+        self.select_all_action.setToolTip(t("common.menus.edit.selectAll.tooltip"))
+        self.zoom_in_action.setToolTip(t("common.menus.view.zoomIn.tooltip"))
+        self.zoom_out_action.setToolTip(t("common.menus.view.zoomOut.tooltip"))
+        self.fullscreen_action.setToolTip(t("common.menus.view.fullscreen.tooltip"))
+        self.settings_action.setToolTip(t("common.menus.tools.settings.tooltip"))
+        self.preferences_action.setToolTip(t("common.menus.tools.preferences.tooltip"))
+        self.extensions_action.setToolTip(t("common.menus.tools.extensions.tooltip"))
+        self.plugins_action.setToolTip(t("common.menus.tools.plugins.tooltip"))
+        self.documentation_action.setToolTip(t("common.menus.help.documentation.tooltip"))
+        self.support_action.setToolTip(t("common.menus.help.support.tooltip"))
+        self.check_for_updates_action.setToolTip(t("common.menus.help.checkForUpdates.tooltip"))
+        self.about_action.setToolTip(t("common.menus.help.about.tooltip"))
 
     def _create_menus(self) -> None:
         """Create the application menus."""
@@ -339,9 +408,14 @@ class NDAstroMainWindow(QMainWindow):
     def _toggle_fullscreen(self) -> None:
         pass
 
+    @inject
     def _open_settings(self) -> None:
-        s = SettingsWindow(self._settings_manager)
-        s.show()
+        content = SettingsDialog(SettingsViewModel(settings_manager=self._settings_manager))
+        content.setWindowTitle(t("common.menus.tools.settings"))
+        # Show modal
+        dlg = FramelessModalDialog(self, title="Custom Modal", content=content)
+        content.close_button.clicked.connect(lambda: dlg.accept())
+        dlg.show_with_backdrop()
 
     def _open_preferences(self) -> None:
         pass

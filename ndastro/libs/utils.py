@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timedelta
 from itertools import groupby
 from math import atan2, ceil, cos, degrees, floor, radians, sin, tan
@@ -454,3 +455,20 @@ def get_kattams(lat: Angle, lon: Angle, given_time: datetime) -> list[Kattam]:
     kattams.sort(key=lambda x: x.order)
 
     return kattams
+
+
+def ensure_event_loop() -> asyncio.AbstractEventLoop:
+    """Ensure that an asyncio event loop is available.
+
+    Returns:
+        asyncio.AbstractEventLoop: The current event loop or a new one if none exists.
+
+    """
+    try:
+        return asyncio.get_event_loop()
+    except (AssertionError, RuntimeError):
+        asyncio.set_event_loop(asyncio.new_event_loop())
+
+    # Note: No clever tricks are used here to dry up code
+    # This avoids an infinite loop if settings the event loop ever fails
+    return asyncio.get_event_loop()

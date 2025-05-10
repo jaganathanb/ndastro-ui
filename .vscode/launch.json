@@ -13,6 +13,21 @@
       "console": "integratedTerminal"
     },
     {
+      "name": "Python: Pyside6",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/ndastro/main.py",
+      "justMyCode": false,
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/ndastro"
+      }
+    },
+    
+      // Use this configuration to debug tests in the current file
+      // You can also use the 'Python: Test Current File' configuration for this purpose
+      // but this one is more flexible and allows you to set breakpoints in the test file
+    {
       "name": "Python: Debug Tests",
       "type": "debugpy",
       "request": "launch",

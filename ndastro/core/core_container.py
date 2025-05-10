@@ -9,7 +9,7 @@ import logging
 import logging.config
 import os
 from collections.abc import Generator
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 
 from dependency_injector import containers, providers
 
@@ -40,6 +40,27 @@ def _init_thread_pool(max_workers: int) -> Generator[ThreadPoolExecutor, None, N
     thread_pool.shutdown(wait=True)
 
 
+def _init_process_pool(max_workers: int) -> Generator[ProcessPoolExecutor, None, None]:
+    """Initialize a process pool executor with the specified maximum number of workers.
+
+    This function creates a `ProcessPoolExecutor` instance and yields it for use.
+    Once the generator is exhausted, the process pool is properly shut down.
+
+    Args:
+        max_workers (int): The maximum number of worker processes to use in the pool.
+
+    Yields:
+        ProcessPoolExecutor: The initialized process pool executor.
+
+    Ensures:
+        The process pool is shut down gracefully after use.
+
+    """
+    process_pool = ProcessPoolExecutor(max_workers=max_workers)
+    yield process_pool
+    process_pool.shutdown(wait=True)
+
+
 class CoreContainer(containers.DeclarativeContainer):
     """Manage core services using a dependency injection container.
 
@@ -54,12 +75,17 @@ class CoreContainer(containers.DeclarativeContainer):
         max_workers=os.cpu_count() or 1,
     )
 
+    process_pool = providers.Resource(
+        _init_process_pool,
+        max_workers=os.cpu_count() or 1,
+    )
+
     logging = providers.Resource(
         logging.config.dictConfig,
         config=config.logging,
     )
 
-    settings_manager = providers.Singleton(SettingsManager, "settings.ini")
+    settings_manager = providers.Singleton(SettingsManager, thread_pool=thread_pool, config_file="settings.ini")
 
     ndastro_service = providers.Singleton(NdAstroService, settings_manager=settings_manager)
     kattam_service = providers.Singleton(KattamService, settings_manager=settings_manager)

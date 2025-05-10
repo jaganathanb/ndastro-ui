@@ -115,7 +115,7 @@ class NDAstroViewModel(QObject):
         """
         self._model.kattams = value
 
-    def set_language(self, index: int) -> None:
+    async def set_language(self, index: int) -> None:
         """Set language to be used.
 
         Args:
@@ -124,6 +124,8 @@ class NDAstroViewModel(QObject):
         """
         lang = self.locales[index]
         set_i18n_config("locale", lang[1])
+
+        await self._settings_manager.set_async("APP", "language", lang[1])
         self.language_changed.emit(lang[1])
 
     async def set_theme(self, index: int) -> None:

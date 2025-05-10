@@ -11,7 +11,9 @@ from ndastro.gui.models.kattam import Kattam
 from ndastro.gui.models.ndastro_model import NDAstroModel
 from ndastro.gui.models.planet_position import PlanetDetail
 from ndastro.gui.viewmodels.ndastro_vm import NDAstroViewModel
+from ndastro.gui.viewmodels.settings_vm import SettingsViewModel
 from ndastro.gui.views.ndastro_ui import NDAstroMainWindow
+from ndastro.gui.views.widgets.settings import SettingsDialog
 
 
 class GuiContainer(containers.DeclarativeContainer):
@@ -49,4 +51,13 @@ class GuiContainer(containers.DeclarativeContainer):
         settings_manager=settings_manager,
     )
 
+    settings_vm = providers.Factory(
+        SettingsViewModel,
+        settings_manager=settings_manager,
+    )
+
+    settings_view = providers.Factory(
+        SettingsDialog,
+        view_model=settings_vm,
+    )
     ndastro_view = providers.Factory(NDAstroMainWindow, view_model=ndastro_vm, settings_manager=settings_manager)
