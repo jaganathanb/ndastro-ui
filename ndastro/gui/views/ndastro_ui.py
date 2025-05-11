@@ -2,7 +2,7 @@
 
 import asyncio
 
-from dependency_injector.wiring import inject
+from dependency_injector.wiring import Provide, inject
 from i18n.translator import t
 from PySide6.QtCore import Slot
 from PySide6.QtGui import QAction, QIcon
@@ -25,10 +25,7 @@ from ndastro.gui.views.controls.dialogs.frameless_modal import (
     FramelessModalDialog,
 )
 from ndastro.gui.views.widgets.resizable_chart import ResizableAstroChart
-from ndastro.gui.views.widgets.settings import (
-    SettingsDialog,
-    SettingsViewModel,
-)
+from ndastro.gui.views.widgets.settings import SettingsDialog
 
 
 class NDAstroMainWindow(QMainWindow):
@@ -409,8 +406,8 @@ class NDAstroMainWindow(QMainWindow):
         pass
 
     @inject
-    def _open_settings(self) -> None:
-        content = SettingsDialog(SettingsViewModel(settings_manager=self._settings_manager))
+    def _open_settings(self, dialog: SettingsDialog = Provide["gui_package.settings_view"]) -> None:
+        content = dialog
         content.setWindowTitle(t("common.menus.tools.settings"))
         # Show modal
         dlg = FramelessModalDialog(self, title="Custom Modal", content=content)

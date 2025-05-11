@@ -52,7 +52,6 @@ class SettingsDialog(QWidget):
         super().__init__()
         self.view_model = view_model
         self.setWindowTitle("Application Settings")
-        self.resize(640, 480)
 
         self.sidebar = QListWidget()
         self.stack = QStackedWidget()

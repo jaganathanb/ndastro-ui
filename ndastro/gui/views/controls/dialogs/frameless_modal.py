@@ -3,7 +3,13 @@ from __future__ import annotations
 from typing import cast
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QDialog, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QLabel,
+    QVBoxLayout,
+    QWidget,
+)
 
 from ndastro.gui.views.controls.dialogs.backdrop import Backdrop
 
@@ -80,11 +86,23 @@ class FramelessModalDialog(QDialog):
             self._backdrop.close()
 
     def _center_dialog(self) -> None:
-        parent_geometry = cast("QWidget", self.parent()).geometry()
-        self.adjustSize()
-        dialog_width = self.width()
-        dialog_height = self.height()
-        self.move(
-            parent_geometry.center().x() - dialog_width // 2,
-            parent_geometry.center().y() - dialog_height // 2,
-        )
+        if self.parent():
+            parent_rect = cast("QWidget", self.parent()).rect()
+            self.resize(
+                int(parent_rect.width() * 0.75),
+                int(parent_rect.height() * 0.75),
+            )
+            dialog_width = self.width()
+            dialog_height = self.height()
+
+            bd = cast("QWidget", self._backdrop)
+
+            self.move(
+                bd.x() + (bd.width() // 2 - dialog_width // 2),
+                bd.y() + (bd.height() // 2 - dialog_height // 2),
+            )  # Center the dialog
+        else:
+            # If no parent, resize to 75% of the screen
+            screen = QApplication.primaryScreen().geometry()
+            self.resize(int(screen.width() * 0.75), int(screen.height() * 0.75))
+            self.move(screen.center() - self.rect().center())

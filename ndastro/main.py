@@ -9,6 +9,7 @@ import pytz
 from dependency_injector.wiring import Provide, inject
 from i18n import set as set_i18n_config
 from PySide6 import QtAsyncio
+from PySide6.QtCore import QFile, QTextStream
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QApplication
 from qdarkstyle import DarkPalette, LightPalette, load_stylesheet
@@ -38,8 +39,14 @@ def init(app: QApplication, settings_manager: SettingsManager, ndastro_view: NDA
     pix = QPixmap(str(Path(settings_manager.get("APP", "app_icon")).resolve()))
     app.setWindowIcon(QIcon(pix))
 
+    file = QFile(":/styles/core.qss")
+    file.open(QFile.OpenModeFlag.ReadOnly | QFile.OpenModeFlag.Text)
+    stream = QTextStream(file)
+    stylesheet = stream.readAll()
+    file.close()
+
     palette = DarkPalette if settings_manager.get("APP", "theme") == "dark" else LightPalette
-    app.setStyleSheet(load_stylesheet(qt_api="pyside6", palette=palette))
+    app.setStyleSheet(load_stylesheet(qt_api="pyside6", palette=palette) + stylesheet)
 
     ndastro_view.show()
     logger.info("NDAstro view displayed.")
