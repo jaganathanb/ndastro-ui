@@ -411,7 +411,9 @@ class NDAstroMainWindow(QMainWindow):
         content.setWindowTitle(t("common.menus.tools.settings"))
         # Show modal
         dlg = FramelessModalDialog(self, title="Custom Modal", content=content)
-        content.close_button.clicked.connect(lambda: dlg.accept())
+
+        content.close_dialog.connect(lambda: dlg.accept())
+
         dlg.show_with_backdrop()
 
     def _open_preferences(self) -> None:

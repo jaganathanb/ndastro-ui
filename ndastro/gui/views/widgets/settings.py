@@ -6,6 +6,7 @@ application settings, including general and appearance settings.
 
 import asyncio
 
+from PySide6.QtCore import Signal, SignalInstance
 from PySide6.QtGui import QShowEvent
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -14,10 +15,12 @@ from PySide6.QtWidgets import (
     QPushButton,
     QStackedWidget,
     QVBoxLayout,
-    QWidget,
 )
 
 from ndastro.gui.viewmodels.settings_vm import SettingsViewModel
+from ndastro.gui.views.controls.dialogs.base_dialog_content import (
+    BaseDialogContent,
+)
 from ndastro.gui.views.widgets.setting_sections.appearance_section import (
     AppearanceSection,
 )
@@ -26,7 +29,7 @@ from ndastro.gui.views.widgets.setting_sections.genenral_section import (
 )
 
 
-class SettingsDialog(QWidget):
+class SettingsDialog(BaseDialogContent):
     """A dialog for managing application settings.
 
     This dialog provides a user interface for modifying and saving
@@ -42,6 +45,8 @@ class SettingsDialog(QWidget):
 
     """
 
+    _close_dialog = Signal(str)
+
     def __init__(self, view_model: SettingsViewModel) -> None:
         """Initialize the settings dialog.
 
@@ -50,6 +55,7 @@ class SettingsDialog(QWidget):
 
         """
         super().__init__()
+
         self.view_model = view_model
         self.setWindowTitle("Application Settings")
 
@@ -87,11 +93,18 @@ class SettingsDialog(QWidget):
         self.sidebar.currentRowChanged.connect(self.stack.setCurrentIndex)
         self.save_button.clicked.connect(lambda: asyncio.create_task(self._save_and_close()))
         self.reset_button.clicked.connect(self.view_model.load_settings)
+        self.close_button.clicked.connect(lambda: self._close_dialog.emit("close"))
 
     async def _save_and_close(self) -> None:
         await self.view_model.save_settings()
+        self._close_dialog.emit()
 
     def show_event(self, arg__1: QShowEvent) -> None:
         """Override show_event to load settings when the dialog is shown."""
         self.view_model.load_settings()
         super().showEvent(arg__1)
+
+    @property
+    def close_dialog(self) -> SignalInstance:
+        """Signal emitted to request closing the dialog."""
+        return self._close_dialog
